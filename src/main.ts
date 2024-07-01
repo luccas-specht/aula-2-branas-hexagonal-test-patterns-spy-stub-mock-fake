@@ -1,6 +1,6 @@
-import AccountService, { AccountServiceProduction } from "./application";
-import API from "./driver";
-import { AccountDAODatabase } from "./resource";
+import AccountService, { AccountServiceProduction } from './application';
+import API from './driver';
+import { AccountDAODatabase } from './resource';
 
 const accountDAO = new AccountDAODatabase();
 const accountService = new AccountServiceProduction(accountDAO);

@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "npx ts-node src/main.ts",
+    "test-all": "npx jest",
+    "test-watch-all": "npx jest --watchAll"
+  },
   "dependencies": {
     "@types/express": "^4.17.17",
     "@types/jest": "^29.5.4",
