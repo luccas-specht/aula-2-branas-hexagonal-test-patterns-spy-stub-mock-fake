@@ -83,7 +83,7 @@ export class RideServiceProduction implements RideService {
     );
 
     if (isThereAnyRideUncompleted) {
-      throw new Error('Passenger did not completed a ride yet');
+      throw new Error('Passenger still has a requested ride');
     }
 
     const ride = {

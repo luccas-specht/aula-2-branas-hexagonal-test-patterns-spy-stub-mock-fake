@@ -118,12 +118,13 @@ export class RideDAODatabase implements RideDAO {
         database: 'branas',
       })
     );
-    const [ride] = await connection.query(
+    const rides = await connection.query(
       'select * from cccat17.ride where passenger_id = $1',
       [passengerId]
     );
+
     await connection.$pool.end();
-    return ride ?? undefined;
+    return rides ?? undefined;
   }
 
   async getRideByRideId(rideId: string): Promise<any> {

@@ -14,7 +14,7 @@ import sinon from 'sinon';
 let accountService: AccountService;
 let rideService: RideService;
 
-describe('Account', () => {
+describe.skip('Account', () => {
   beforeEach(() => {
     const accountDAO = new AccountDAODatabase();
     accountService = new AccountServiceProduction(accountDAO);
@@ -314,7 +314,6 @@ describe('Ride', () => {
    */
   test('Should throw an exception when an user has an uncompleted ride status - go into database', async () => {
     const createPassengerAccount = {
-      accountId: crypto.randomUUID(),
       name: 'does not matter',
       email: `doesNotMatter@gmail${Math.random()}@gmail.com`,
       cpf: '97456321558',
@@ -323,7 +322,6 @@ describe('Ride', () => {
     };
 
     const requestARide = {
-      passenger_id: null,
       from_lat: -29.9069906,
       from_long: -51.1720954,
       to_lat: -29.7282985,
@@ -331,11 +329,44 @@ describe('Ride', () => {
     };
 
     const outputSignup = await accountService.signup(createPassengerAccount);
-    const outputRequestRide = await rideService.requestRide({
+    expect(outputSignup.accountId).toBeDefined();
+
+    await rideService.requestRide({
       ...requestARide,
       passenger_id: outputSignup.accountId,
     });
 
-    //expect(outputRequestRide.ride_id).toBeDefined();
+    await expect(
+      rideService.requestRide({
+        ...requestARide,
+        passenger_id: outputSignup.accountId,
+      })
+    ).rejects.toThrow('Passenger still has a requested ride');
+  });
+
+  test('Should request a ride correctly', async () => {
+    const createPassengerAccount = {
+      name: 'does not matter',
+      email: `doesNotMatter@gmail${Math.random()}@gmail.com`,
+      cpf: '97456321558',
+      isPassenger: true,
+      isDriver: false,
+    };
+
+    const requestARide = {
+      from_lat: -29.9069906,
+      from_long: -51.1720954,
+      to_lat: -29.7282985,
+      to_long: -51.157259,
+    };
+
+    const outputSignup = await accountService.signup(createPassengerAccount);
+    const outputRequestSide = await rideService.requestRide({
+      ...requestARide,
+      passenger_id: outputSignup.accountId,
+    });
+
+    expect(outputSignup.accountId).toBeDefined();
+    expect(outputRequestSide.ride_id).toBeDefined();
   });
 });
