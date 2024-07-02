@@ -10,7 +10,11 @@ export default interface AccountDAO {
 export class AccountDAODatabase implements AccountDAO {
   async getAccountByEmail(email: string) {
     const connection = pgp()(
-      'postgres://postgres:231123@localhost:5432/branas'
+      createUrldbConnection({
+        host: 'localhost',
+        password: '231123',
+        database: 'branas',
+      })
     );
     const [account] = await connection.query(
       'select * from cccat17.account where email = $1',
@@ -82,5 +86,117 @@ export class AccountDAOMemory implements AccountDAO {
 
   async saveAccount(account: any): Promise<void> {
     this.accounts.push(account);
+  }
+}
+
+type Ride = {
+  ride_id: string;
+  passenger_id: string;
+  status: string;
+  fare: number;
+  distance: number;
+  from_lat: number;
+  from_long: number;
+  to_lat: number;
+  to_long: number;
+  date: Date;
+  driver_id?: string;
+};
+
+export interface RideDAO {
+  getRideByRideId(rideId: string): Promise<Ride | undefined>;
+  getRideByPassengerId(passengerId: string): Promise<Ride | undefined>;
+  saveRide(ride: Ride): Promise<void>;
+}
+
+export class RideDAODatabase implements RideDAO {
+  async getRideByPassengerId(passengerId: string): Promise<any> {
+    const connection = pgp()(
+      createUrldbConnection({
+        host: 'localhost',
+        password: '231123',
+        database: 'branas',
+      })
+    );
+    const [ride] = await connection.query(
+      'select * from cccat17.ride where passenger_id = $1',
+      [passengerId]
+    );
+    await connection.$pool.end();
+    return ride ?? undefined;
+  }
+
+  async getRideByRideId(rideId: string): Promise<any> {
+    const connection = pgp()(
+      createUrldbConnection({
+        host: 'localhost',
+        password: '231123',
+        database: 'branas',
+      })
+    );
+    const [ride] = await connection.query(
+      'select * from cccat17.ride where ride_id  = $1',
+      [rideId]
+    );
+    await connection.$pool.end();
+    return ride ?? undefined;
+  }
+
+  async saveRide(ride: Ride): Promise<any> {
+    const connection = pgp()(
+      createUrldbConnection({
+        host: 'localhost',
+        password: '231123',
+        database: 'branas',
+      })
+    );
+    await connection.query(
+      'insert into cccat17.ride (ride_id, passenger_id, driver_id, status, fare, distance, from_lat, from_long, to_lat, to_long, date) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
+      [
+        ride.ride_id,
+        ride.passenger_id,
+        null,
+        'requested',
+        ride.fare,
+        ride.distance,
+        ride.from_lat,
+        ride.from_long,
+        ride.to_lat,
+        ride.to_long,
+        ride.date,
+      ]
+    );
+    await connection.$pool.end();
+  }
+}
+
+export class RideDAOMemory implements RideDAO {
+  accounts: Ride[];
+
+  constructor() {
+    this.accounts = [];
+  }
+
+  saveRide(ride: Ride): Promise<void> {
+    return new Promise((resolve) => {
+      this.accounts.push(ride);
+      resolve();
+    });
+  }
+
+  getRideByRideId(ride_id: string): Promise<Ride | undefined> {
+    return new Promise((resolve) => {
+      const ride = this.accounts.find((element) => element.ride_id === ride_id);
+      resolve(ride);
+    });
+  }
+
+  getRideByPassengerId(passenger_id: string): Promise<Ride | undefined> {
+    return new Promise((resolve) => {
+      const ride = this.accounts.find(
+        (element) => element.passenger_id === passenger_id
+      );
+      resolve(ride);
+    });
   }
 }

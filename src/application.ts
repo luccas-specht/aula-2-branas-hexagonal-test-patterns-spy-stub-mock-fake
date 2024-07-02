@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { validateCpf } from './validateCpf';
-import AccountDAO from './resource';
+import AccountDAO, { RideDAO } from './resource';
 import MailerGateway from './MailerGateway';
 
 export default interface AccountService {
@@ -56,11 +56,11 @@ export interface RideService {
 }
 
 export class RideServiceProduction implements RideService {
-  rideService: any;
+  rideDAO: RideDAO;
   accountService: AccountService;
 
-  constructor(rideService: any, accountService: AccountService) {
-    this.rideService = rideService;
+  constructor(rideDAO: RideDAO, accountService: AccountService) {
+    this.rideDAO = rideDAO;
     this.accountService = accountService;
   }
 

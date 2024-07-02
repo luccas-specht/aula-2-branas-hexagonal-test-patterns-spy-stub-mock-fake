@@ -4,7 +4,11 @@ import AccountService, {
   RideServiceProduction,
   RideService,
 } from '../src/application';
-import { AccountDAODatabase, AccountDAOMemory } from '../src/resource';
+import {
+  AccountDAODatabase,
+  AccountDAOMemory,
+  RideDAODatabase,
+} from '../src/resource';
 import sinon from 'sinon';
 
 let accountService: AccountService;
@@ -233,15 +237,15 @@ describe.skip('Account', () => {
 });
 
 describe('Ride', () => {
-  let accountService: AccountService;
-  let accountDAO: AccountDAOMemory;
+  let accountDAO: AccountDAODatabase;
+  let rideDAO: RideDAODatabase;
 
   beforeEach(() => {
     accountService = new AccountServiceProduction(accountDAO);
-    rideService = new RideServiceProduction({}, accountService);
+    rideService = new RideServiceProduction(rideDAO, accountService);
   });
 
-  test.skip('Should request a ride correctly', async () => {
+  test('Should request a ride correctly', async () => {
     const input = {
       accountId: 'str',
       from: {
@@ -258,7 +262,7 @@ describe('Ride', () => {
     expect(true).toBe(true);
   });
 
-  test.skip('Should throw an exception when an accountId informed does not exists', async () => {
+  test('Should throw an exception when an accountId informed does not exists', async () => {
     const input = {
       accountId: 'str',
     };
@@ -276,7 +280,7 @@ describe('Ride', () => {
    *  3 - Third: Use a stub to simulate the call of accountDAO getAccountById and always return true
    *  4 - Fourth: Use a mock to mock this call and its response and create a mock response
    */
-  test.only('Should throw an exception when an user is not a passenger and wants to request a ride - Mock sinon', async () => {
+  test('Should throw an exception when an user is not a passenger and wants to request a ride - Mock sinon', async () => {
     const input = {
       account_id: 'non-exists',
     };
@@ -302,5 +306,23 @@ describe('Ride', () => {
 
     mockAccountDAODatabase.verify();
     mockAccountDAODatabase.restore();
+  });
+
+  test('Should throw an exception when an user is not a passenger and wants to request a ride - Stub sinon', async () => {
+    const input = {
+      account_id: 'non-exists',
+    };
+    const output = {
+      is_passenger: false,
+    };
+
+    const stubAccountService = sinon
+      .stub(AccountServiceProduction.prototype, 'getAccount')
+      .resolves(output);
+
+    await expect(rideService.requestRide(input)).rejects.toThrow(
+      'User can not request a ride because they are not a passenger'
+    );
+    stubAccountService.restore();
   });
 });
