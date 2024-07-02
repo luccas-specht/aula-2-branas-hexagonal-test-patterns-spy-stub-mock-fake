@@ -14,7 +14,7 @@ import sinon from 'sinon';
 let accountService: AccountService;
 let rideService: RideService;
 
-describe.skip('Account', () => {
+describe('Account', () => {
   beforeEach(() => {
     const accountDAO = new AccountDAODatabase();
     accountService = new AccountServiceProduction(accountDAO);
@@ -237,29 +237,11 @@ describe.skip('Account', () => {
 });
 
 describe('Ride', () => {
-  let accountDAO: AccountDAODatabase;
-  let rideDAO: RideDAODatabase;
-
   beforeEach(() => {
+    const accountDAO = new AccountDAODatabase();
+    const rideDAO = new RideDAODatabase();
     accountService = new AccountServiceProduction(accountDAO);
     rideService = new RideServiceProduction(rideDAO, accountService);
-  });
-
-  test('Should request a ride correctly', async () => {
-    const input = {
-      accountId: 'str',
-      from: {
-        lat: -182718621,
-        long: -8162771627,
-      },
-      to: {
-        lat: -817281212,
-        long: -9182812,
-      },
-    };
-    const result = await rideService.requestRide(input);
-
-    expect(true).toBe(true);
   });
 
   test('Should throw an exception when an accountId informed does not exists', async () => {
