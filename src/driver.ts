@@ -29,6 +29,12 @@ export default class API {
       const output = await this.accountService.getAccount(accountId);
       res.json(output);
     });
+
+    this.app.post('/request-ride', async (req: any, res: any) => {
+      const accountId = req.params.accountId;
+      const output = await this.accountService.getAccount(accountId);
+      res.json(output);
+    });
   }
 
   start() {

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "npx ts-node src/main.ts",
     "test-all": "npx jest",
-    "test-watch-all": "npx jest --watchAll"
+    "test-watch-all": "npx jest --watchAll",
+    "test-request": "npx jest test/application.test.ts --watch"
   },
   "dependencies": {
     "@types/express": "^4.17.17",

@@ -49,3 +49,44 @@ export class AccountServiceProduction implements AccountService {
     return account;
   }
 }
+
+export interface RideService {
+  requestRide(input: any): Promise<any>;
+  getRide(input: any): Promise<any>;
+}
+
+export class RideServiceProduction implements RideService {
+  rideService: any;
+  accountService: AccountService;
+
+  constructor(rideService: any, accountService: AccountService) {
+    this.rideService = rideService;
+    this.accountService = accountService;
+  }
+
+  async requestRide(input: any): Promise<any> {
+    const ride = {
+      passenger_id: input?.account_id,
+      from_lat: input?.from?.lat,
+      from_long: input?.from?.long,
+      to_lat: input?.to?.lat,
+      to_long: input.to?.long,
+    };
+
+    const account = await this.accountService.getAccount(ride.passenger_id);
+
+    if (!account) {
+      throw new Error('Account does not exists');
+    }
+
+    if (!account.is_passenger) {
+      throw new Error(
+        'User can not request a ride because they are not a passenger'
+      );
+    }
+  }
+
+  getRide(input: any): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+}

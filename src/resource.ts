@@ -32,6 +32,9 @@ export class AccountDAODatabase implements AccountDAO {
       'select * from cccat17.account where account_id = $1',
       [accountId]
     );
+    if (!account) {
+      return undefined;
+    }
     await connection.$pool.end();
     return { ...account, ...{ carPlate: account.car_plate } };
   }
