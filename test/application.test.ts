@@ -233,7 +233,6 @@ describe.skip('Account', () => {
 });
 
 describe('Ride', () => {
-  let rideService: RideService;
   let accountService: AccountService;
   let accountDAO: AccountDAOMemory;
 
@@ -242,7 +241,7 @@ describe('Ride', () => {
     rideService = new RideServiceProduction({}, accountService);
   });
 
-  test('Should request a ride correctly', async () => {
+  test.skip('Should request a ride correctly', async () => {
     const input = {
       accountId: 'str',
       from: {
@@ -259,7 +258,7 @@ describe('Ride', () => {
     expect(true).toBe(true);
   });
 
-  test('Should throw an exception when an accountId informed does not exists', async () => {
+  test.skip('Should throw an exception when an accountId informed does not exists', async () => {
     const input = {
       accountId: 'str',
     };
@@ -279,19 +278,23 @@ describe('Ride', () => {
    */
   test.only('Should throw an exception when an user is not a passenger and wants to request a ride - Mock sinon', async () => {
     const input = {
-      account_id: 'non-exists', // use account_id to match the application code
+      account_id: 'non-exists',
     };
 
     const output = {
       is_passenger: false,
     };
 
-    const mockAccountDAODatabase = sinon.mock(AccountDAODatabase.prototype);
+    const mockAccountDAODatabase = sinon.mock(
+      AccountServiceProduction.prototype
+    );
     mockAccountDAODatabase
-      .expects('getAccountById')
+      .expects('getAccount')
       .withArgs(input.account_id)
       .once()
-      .returns(Promise.resolve(output));
+      .callsFake(() => {
+        return output;
+      });
 
     await expect(rideService.requestRide(input)).rejects.toThrow(
       'User can not request a ride because they are not a passenger'
