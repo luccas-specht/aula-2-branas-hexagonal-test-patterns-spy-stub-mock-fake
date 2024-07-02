@@ -248,7 +248,6 @@ describe('Ride', () => {
     const input = {
       accountId: 'str',
     };
-
     await expect(() => rideService.requestRide(input)).rejects.toThrow(
       new Error('Account does not exists')
     );
@@ -264,19 +263,19 @@ describe('Ride', () => {
    */
   test('Should throw an exception when an user is not a passenger and wants to request a ride - Mock sinon', async () => {
     const input = {
-      account_id: 'non-exists',
+      passenger_id: 'non-exists',
     };
 
     const output = {
       is_passenger: false,
     };
 
-    const mockAccountDAODatabase = sinon.mock(
+    const mockAccountServiceProduction = sinon.mock(
       AccountServiceProduction.prototype
     );
-    mockAccountDAODatabase
+    mockAccountServiceProduction
       .expects('getAccount')
-      .withArgs(input.account_id)
+      .withArgs(input.passenger_id)
       .once()
       .callsFake(() => {
         return output;
@@ -286,8 +285,8 @@ describe('Ride', () => {
       'User can not request a ride because they are not a passenger'
     );
 
-    mockAccountDAODatabase.verify();
-    mockAccountDAODatabase.restore();
+    mockAccountServiceProduction.verify();
+    mockAccountServiceProduction.restore();
   });
 
   test('Should throw an exception when an user is not a passenger and wants to request a ride - Stub sinon', async () => {
@@ -306,5 +305,37 @@ describe('Ride', () => {
       'User can not request a ride because they are not a passenger'
     );
     stubAccountService.restore();
+  });
+
+  /**
+   *  Tests approaches
+   *  1 - first: go into real database and test it
+   *  2 - second create a fake
+   */
+  test('Should throw an exception when an user has an uncompleted ride status - go into database', async () => {
+    const createPassengerAccount = {
+      accountId: crypto.randomUUID(),
+      name: 'does not matter',
+      email: `doesNotMatter@gmail${Math.random()}@gmail.com`,
+      cpf: '97456321558',
+      isPassenger: true,
+      isDriver: false,
+    };
+
+    const requestARide = {
+      passenger_id: null,
+      from_lat: -29.9069906,
+      from_long: -51.1720954,
+      to_lat: -29.7282985,
+      to_long: -51.157259,
+    };
+
+    const outputSignup = await accountService.signup(createPassengerAccount);
+    const outputRequestRide = await rideService.requestRide({
+      ...requestARide,
+      passenger_id: outputSignup.accountId,
+    });
+
+    //expect(outputRequestRide.ride_id).toBeDefined();
   });
 });

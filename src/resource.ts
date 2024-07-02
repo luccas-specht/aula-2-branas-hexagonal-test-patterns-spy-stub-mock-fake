@@ -99,13 +99,13 @@ type Ride = {
   from_long: number;
   to_lat: number;
   to_long: number;
-  date: Date;
-  driver_id?: string;
+  date: any;
+  driver_id: string | null;
 };
 
 export interface RideDAO {
   getRideByRideId(rideId: string): Promise<Ride | undefined>;
-  getRideByPassengerId(passengerId: string): Promise<Ride | undefined>;
+  getRideByPassengerId(passengerId: string): Promise<Ride[] | undefined>;
   saveRide(ride: Ride): Promise<void>;
 }
 
@@ -191,9 +191,9 @@ export class RideDAOMemory implements RideDAO {
     });
   }
 
-  getRideByPassengerId(passenger_id: string): Promise<Ride | undefined> {
+  getRideByPassengerId(passenger_id: string): Promise<Ride[] | undefined> {
     return new Promise((resolve) => {
-      const ride = this.accounts.find(
+      const ride = this.accounts.filter(
         (element) => element.passenger_id === passenger_id
       );
       resolve(ride);

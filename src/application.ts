@@ -65,15 +65,7 @@ export class RideServiceProduction implements RideService {
   }
 
   async requestRide(input: any): Promise<any> {
-    const ride = {
-      passenger_id: input?.account_id,
-      from_lat: input?.from?.lat,
-      from_long: input?.from?.long,
-      to_lat: input?.to?.lat,
-      to_long: input.to?.long,
-    };
-
-    const account = await this.accountService.getAccount(ride.passenger_id);
+    const account = await this.accountService.getAccount(input.passenger_id);
 
     if (!account) {
       throw new Error('Account does not exists');
@@ -84,6 +76,32 @@ export class RideServiceProduction implements RideService {
         'User can not request a ride because they are not a passenger'
       );
     }
+
+    const rides = await this.rideDAO.getRideByPassengerId(input.passenger_id);
+    const isThereAnyRideUncompleted = rides?.find(
+      (ride) => ride.status !== 'completed'
+    );
+
+    if (isThereAnyRideUncompleted) {
+      throw new Error('Passenger did not completed a ride yet');
+    }
+
+    const ride = {
+      ride_id: crypto.randomUUID(),
+      driver_id: null,
+      status: 'requested',
+      fare: 50,
+      distance: 25,
+      passenger_id: input?.passenger_id,
+      from_lat: input?.from_lat,
+      from_long: input?.from_long,
+      to_lat: input?.to_lat,
+      to_long: input.to_long,
+      date: new Date(),
+    };
+
+    await this.rideDAO.saveRide(ride);
+    return { ride_id: ride.ride_id };
   }
 
   getRide(input: any): Promise<any> {
