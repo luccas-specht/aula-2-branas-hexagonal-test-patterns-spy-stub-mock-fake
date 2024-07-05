@@ -104,7 +104,13 @@ export class RideServiceProduction implements RideService {
     return { ride_id: ride.ride_id };
   }
 
-  getRide(input: any): Promise<any> {
-    throw new Error('Method not implemented.');
+  async getRide(input: any): Promise<any> {
+    const rideId = input.ride_id;
+
+    const ride = await this.rideDAO.getRideByRideId(rideId);
+
+    if (!ride) throw new Error('Ride does not exists');
+
+    return ride;
   }
 }

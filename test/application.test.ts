@@ -14,7 +14,7 @@ import sinon from 'sinon';
 let accountService: AccountService;
 let rideService: RideService;
 
-describe.skip('Account', () => {
+describe('Account', () => {
   beforeEach(() => {
     const accountDAO = new AccountDAODatabase();
     accountService = new AccountServiceProduction(accountDAO);
@@ -368,5 +368,46 @@ describe('Ride', () => {
 
     expect(outputSignup.accountId).toBeDefined();
     expect(outputRequestSide.ride_id).toBeDefined();
+  });
+
+  test('Should get a ride correctly', async () => {
+    const createPassengerAccount = {
+      name: 'does not matter',
+      email: `doesNotMatter@gmail${Math.random()}@gmail.com`,
+      cpf: '97456321558',
+      isPassenger: true,
+      isDriver: false,
+    };
+
+    const requestARide = {
+      from_lat: -29.9069906,
+      from_long: -51.1720954,
+      to_lat: -29.7282985,
+      to_long: -51.157259,
+    };
+
+    const outputSignup = await accountService.signup(createPassengerAccount);
+    const outputRequestSide = await rideService.requestRide({
+      ...requestARide,
+      passenger_id: outputSignup.accountId,
+    });
+
+    expect(outputSignup.accountId).toBeDefined();
+    expect(outputRequestSide.ride_id).toBeDefined();
+
+    const outputGetRide = await rideService.getRide({
+      ride_id: outputRequestSide.ride_id,
+    });
+
+    console.log({ outputGetRide });
+    expect(outputGetRide).toBeDefined();
+  });
+
+  test('Should not be able to get a ride correctly', async () => {
+    await expect(
+      rideService.getRide({
+        ride_id: undefined,
+      })
+    ).rejects.toThrow('Ride does not exists');
   });
 });
